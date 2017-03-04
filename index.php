@@ -56,13 +56,18 @@
 	}
 	function readView()
 	{
+        $filename = "text/".$_REQUEST['file'].".txt";
+        echo $filename;
+        $file_handle = fopen($filename, "r");
+        $contents = fread($file_handle, filesize($filename));
+        fclose($file_handle);
 		?>
 		<!doctype>
 		<head><title>Read Page</title></head>
 		<body>
 		<h1><a href="index.php">Simple Text Editor</a></h1>
-		<h2>Read:<?php echo (!empty($_REQUEST['file']))?$_REQUEST['file']:'No Title'; ?></h2>
-		<p><?php echo (!empty($contents))?$contents:"";?></p>
+		<h2>Read:<?php echo $_REQUEST['file']; ?></h2>
+		<p><?php echo (!empty($contents))?$contents:"a";?></p>
 		</body>
 		</html>
 		<?php
