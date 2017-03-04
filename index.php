@@ -2,9 +2,11 @@
 	function landingView()
 	{
 		$filearray = glob("text/*.txt");
-		foreach($filearray as &$file) 
+		for($i = 0; $i < sizeof($filearray); $i++)
 		{
-			$file = str_replace("text/", "", $file);
+            $st = str_replace("text/", "", $filearray[$i]);
+			$filearray[$i] = $st;
+
 		}
 		?>
 		<!doctype>
@@ -13,12 +15,12 @@
 		<h1><a href="index.php?page=landingView">Simple Text Editor</a></h1>
 		<form action= "" method="GET">
 			<input type="text" name="file" placeholder="Text File Name" />
-			<input type="hidden" name="page" value="editView">
+            <input type="hidden" name="page" value="editView">
 			<input type="submit" value="Create" />
 		</form>
 		<h2>My Files</h2>
 		<h3>Filename<span> Actions</span></h3>
-		<?php 
+		<?php
 			foreach($filearray as $file)
 			{
 				?>
@@ -83,8 +85,8 @@
 		</html>
 		<?php
 	}
-	
-	if (empty($_REQUEST['page'])) 
+
+	if (empty($_REQUEST['page']))
 	{
 		$_SET['page'] = "landingView";
 		landingView();
@@ -97,11 +99,21 @@
 		}
 		else if ($_REQUEST ['page'] === "editView")
 		{
-			editView();
+            if (empty($_REQUEST['file']) || empty(trim($_REQUEST['file']))) {
+                $_SET['page'] = "landingView";
+                landingView();
+            }
+            else if (!preg_match('/^[a-zA-Z0-9]+$/', $_REQUEST['file'])) {
+                $_SET['page'] = "landingView";
+                landingView();
+            }
+            else {
+             editView();
+            }
+
 		}
 		else if ($_REQUEST['page'] === "readView")
 		{
 			readView();
 		}
 	}
-	
