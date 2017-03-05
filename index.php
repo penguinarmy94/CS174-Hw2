@@ -12,10 +12,10 @@
 		<!doctype>
 		<head><title>Landing Page</title></head>
 		<body>
-		<h1><a href="index.php?page=landingView">Simple Text Editor</a></h1>
+		<h1><a href="index.php?a=landing">Simple Text Editor</a></h1>
 		<form action= "" method="GET">
 			<input type="text" name="file" placeholder="Text File Name" />
-            <input type="hidden" name="page" value="editView">
+            <input type="hidden" name="a" value="edit">
 			<input type="submit" value="Create" />
 		</form>
 		<h2>My Files</h2>
@@ -25,9 +25,9 @@
 			{
 				?>
 				<form action="" method="GET">
-					<a href="index.php?page=readView&file=<?php echo str_replace('.txt', '', $file);?>"><?php echo $file; ?></a>
-					<input type="submit" name="page" value="edit" />
-					<input type="submit" name="page" value="delete" />
+					<a href="index.php?a=read&file=<?php echo str_replace('.txt', '', $file);?>"><?php echo $file; ?></a>
+                    <input type="submit" name="a" value="edit" />
+                    <input type="submit" name="a" value="delete" /><input type="hidden" name="file" value="<?php echo str_replace('.txt', '', $file);?>">
 				</form>
 				<?php
 			}
@@ -38,18 +38,27 @@
 	}
 	function editView()
 	{
+        $filename = "text/".$_REQUEST['file'].".txt";
+        if(file_exists($filename)) {
+            $file_handle = fopen($filename, "r");
+            $contents = fread($file_handle, filesize($filename));
+            fclose($file_handle);
+        }
+
 		?>
 		<!doctype>
 		<head><title>Edit Page</title></head>
 		<body>
-		<h1><a href="index.php?page=landingView">Simple Text Editor</a></h1>
-		<h2>Edit:<?php echo (!empty($_REQUEST['file']))?$_REQUEST['file']:'No Title'; ?></h2>
-		<form action="index.php" method="post">
-			<input type="submit" name="edit_submit" value="save" />
-			<input type="submit" name="edit_submit" value="cancel" />
-			<input type="hidden" name="page" value="landingView">
+		<h1><a href="index.php?a=landing">Simple Text Editor</a></h1>
+		<h2>Read:<?php echo $_REQUEST['file']; ?></h2>
+		<form action="" method="post">
+			<input type="submit" name="Save" value="Save" />
+            <input type="hidden" name="file" value="<?php echo $_REQUEST['file']; ?>">
+            <button formaction="index.php?a=landing">Return</button>
 			<p><textarea name="content" rows="9" cols="50"><?php echo (!empty($contents))?$contents:"";?></textarea></p>
+
 		</form>
+
 		</body>
 		</html>
 		<?php
@@ -57,7 +66,6 @@
 	function readView()
 	{
         $filename = "text/".$_REQUEST['file'].".txt";
-        echo $filename;
         $file_handle = fopen($filename, "r");
         $contents = fread($file_handle, filesize($filename));
         fclose($file_handle);
@@ -81,7 +89,7 @@
 		<h1><a href="index.php">Simple Text Editor</a></h1>
 		<form action= "" method="GET">
 			<input type="text" name="file" placeholder="Text File Name" />
-			<input type="hidden" name="page" value="editView">
+			<input type="hidden" name="a" value="edit">
 			<input type="submit" value="Create" />
 		</form>
 		<h2>My Files</h2>
@@ -91,34 +99,46 @@
 		<?php
 	}
 
-	if (empty($_REQUEST['page']))
+	if (empty($_REQUEST['a']))
 	{
-		$_SET['page'] = "landingView";
+		$_SET['a'] = "landing";
 		landingView();
 	}
 	else
 	{
-		if ($_REQUEST ['page'] === "landingView")
+		if ($_REQUEST ['a'] === "landing")
 		{
 			landingView();
 		}
-		else if ($_REQUEST ['page'] === "editView")
+		else if ($_REQUEST ['a'] === "edit")
 		{
             if (empty($_REQUEST['file']) || empty(trim($_REQUEST['file']))) {
-                $_SET['page'] = "landingView";
-                landingView();
+                $_SET['a'] = "landing";
+                header("Location: index.php?a=landing");
             }
             else if (!preg_match('/^[a-zA-Z0-9]+$/', $_REQUEST['file'])) {
-                $_SET['page'] = "landingView";
-                landingView();
+                $_SET['a'] = "landing";
+                header("Location: index.php?a=landing");
             }
             else {
              editView();
             }
 
 		}
-		else if ($_REQUEST['page'] === "readView")
+		else if ($_REQUEST['a'] === "read")
 		{
 			readView();
 		}
 	}
+
+    if (isset($_POST['Save'])) {
+        if ($_POST['Save'] === 'Save') {
+            $file = "text/".$_POST['file'].".txt";
+            $handler = fopen($file, "w");
+            if ($handler) {
+                fwrite($handler, $_POST['content']);
+                fclose($handler);
+                //echo "<meta http-equiv='refresh' content='0'>";
+            }
+        }
+    }
